@@ -13,6 +13,7 @@ from figlet_text.figlet_text import ask_question_from_the_user
 from config.config import WORKING_DIRECTORY
 from memory.memory_store import save_message,get_context
 from subagents.summary_agent import get_summary
+from subagents.todo_maker_agent import create_todo
 
 import memory.firebase_config
 # think node is the main working head. It think and plans and decide whether to ask questions to user or act on the ask.
@@ -163,6 +164,17 @@ def act_node_general(state:AgentState):
         logger.error(f"Error caught in final generation phase ->{error_in_final_generation}")
 
 
+
+# Node to handle complex project requests
+
+def todo_for_complex_project(state:AgentState):
+    logger.info("Agent making the todo list...")
+    received_todo = create_todo(state["goal"],state["plan"])
+
+    for step,task in received_todo:
+        print(f"\n[{step}] {task}....")
+
+
 # function to builf langgraph stated graph
 
 def build_graph():
@@ -174,6 +186,7 @@ def build_graph():
         graph.add_node("clarify",clarify_node)
         graph.add_node("write",act_node_write)
         graph.add_node("general",act_node_general) 
+        graph.add_node("todo_for_complex_project",todo_for_complex_project)
 
 
         graph.add_edge(START,"think")
@@ -182,11 +195,13 @@ def build_graph():
             "clarify":"clarify",
             "general":"general",
             "write":"write",
+            "need_todo":"todo_for_complex_project"
         })
         
         graph.add_conditional_edges("clarify",route_after_clarity,{
             "general":"general",
             "write":"write",
+            "need_todo":"todo_for_complex_project"
         })
 
         

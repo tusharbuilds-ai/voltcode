@@ -1,6 +1,19 @@
 # utils/response_parser.py
 import json
 from logs.logger import logger
+import re
+
+
+def extract_json(text:str):
+    match = re.search(r"\{.*\}",text,re.DOTALL)
+
+    if not match:
+        raise ValueError("No Json Found")
+    
+    json_str = match.group(0)
+
+    return json.loads(json_str)
+
 
 def extract_text_from_response(response) -> str:
     """Safely extracts text from any Gemini response structure."""

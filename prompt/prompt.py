@@ -13,12 +13,13 @@ system_instruction = """You are a senior code assistant, Your job is to write th
 system_instruction_for_thinking_node = """You are currently in the thinking phase.
                                         RULES-
                                         1. Think step by step
-                                        2. Decide if you need to ask specific question from the user (Do not self make thw things always clear the question from the user for exampleany librabry to use or programming langugage to use etc.)
+                                        2. Decide if you need to ask specific question from the user (Do not self make the things always clear the question from the user for exampleany librabry to use or programming langugage to use etc.)
                                         3. You have web_search if you need it
                                         4. Analize what kind of request is user making -> 
                                          If asking general question - > general
                                          If user asking to make project or write code -> create
                                          If user asking to edit or update any previos code -> edit
+                                         If user asking to make any complex project or a project which need strutured approch which include mutiple folder and file creation need and use of external librabries (like react or angular or frontend,backend application) -> need_todo
                                         5. Follow the below output structure.
                                         
                                          Previous conversation summary ->  {chat_summary}
@@ -30,7 +31,7 @@ system_instruction_for_thinking_node = """You are currently in the thinking phas
                                                 "planed":"fill with what you have planned"
                                                 "need_clarififaction_bool": True or False
                                                 "question_asked": ["Question1","Question 2]
-                                                "action_taken": "create" | "edit" | "general"
+                                                "action_taken": "create" | "edit" | "general | need_todo"
                                             }}
                                         """
 
@@ -108,3 +109,40 @@ system_instruction_for_summary_subagent = """You are being provided a with a cha
                                                   summary:The paragraph of summary
                                               }}
                                               """
+
+system_instruction_for_todo_subagent= """You are provided with the User request and Main Agent planning.
+                                         ROLE ->
+                                         1. According to the context of both user and agent plannig map out a todo list that main agent can follow in loop to build the project.
+                                         
+                                         2. The todo list would act as to reference of main agent to track what is done, what is being done and what has to done.
+                                         
+                                         3. You have to return a complete todo list with each todo having an explaination regarding what is going to happen in the stage
+                                         
+                                         for example->
+                                            a. Initialize react app -> npm init has to be done
+                                            b. Make folder for src -> src folder to be created inside the parent directory.
+                                        
+                                        4. Todo is not to ask user question it is only to help main agent follow today to build complex project
+                                        5. Each todo should start in a new line forming a list.
+                                            
+                                        
+                                        User request -> {user_request}
+                                        Agent plannig -> {agent_plan}
+                                        
+                                        
+                                        OUTPUT -> return JSON only no markup nothing , strictly follow the output schema
+
+
+                                       todo= {{
+                                            todo_item_1 : description,
+                                            todo_item_1 : description,
+                                            todo_item_1 : description,
+                                            todo_item_1 : description,
+                                            todo_item_1 : description,
+                                            todo_item_1 : description,
+                                            ....
+                                        
+                                        }}
+
+
+                                        """

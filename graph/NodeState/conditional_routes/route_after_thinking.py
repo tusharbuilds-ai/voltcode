@@ -10,5 +10,7 @@ def route_after_thinking(state:AgentState):
         return "general"
     elif state['action_taken'] == "create":
         return "write"
+    elif state["action_taken"] == "need_todo":
+        return "need_todo"
 
 route_after_thinking(AgentState)
