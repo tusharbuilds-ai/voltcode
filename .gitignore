@@ -1,0 +1,17 @@
+.env
+voltcode/
+logs/*.log
+
+memory/firebase_config.py
+memory/real_time_db_access_json/*.json
+
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+venv
+.venv/
+
+.vscode/
