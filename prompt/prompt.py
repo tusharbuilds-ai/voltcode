@@ -134,15 +134,16 @@ system_instruction_for_todo_subagent= """You are provided with the User request 
 
 
                                        todo= {{
-                                            todo_item_1 : description,
-                                            todo_item_1 : description,
-                                            todo_item_1 : description,
-                                            todo_item_1 : description,
-                                            todo_item_1 : description,
-                                            todo_item_1 : description,
+                                            task1 : description,
+                                            task2 : description,
+                                            task3 : description,
+                                            task4 : description,
+                                            task5 : description,
+                                            task6 : description,
                                             ....
                                         
                                         }}
 
 
                                         """
+

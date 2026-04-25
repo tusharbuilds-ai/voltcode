@@ -14,4 +14,9 @@ subagent_llm = ChatGoogleGenerativeAI(
     temperature=TEMPERATURE
 )
 
+llm_with_tools = ChatGoogleGenerativeAI(
+    model= GEMINI_MODEL,
+    temperature=TEMPERATURE
+)
+
 

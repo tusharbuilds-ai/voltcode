@@ -3,9 +3,9 @@ from graph.NodeState.state import AgentState
 from graph.NodeState.conditional_routes.route_after_thinking import route_after_thinking
 from graph.NodeState.conditional_routes.route_after_clarify import route_after_clarity
 from logs.logger import logger
-from LLM.llm import llm
+from LLM.llm import llm, llm_with_tools
 import json
-from LLM.tools.tools import make_file
+from LLM.tools.tools import make_file,create_directory
 from helper.helper import extract_text_from_response
 from langchain.messages import HumanMessage,SystemMessage
 from prompt.prompt import system_instruction_for_thinking_node , system_instruction_for_act_write,system_instruction_for_act_general
@@ -14,6 +14,7 @@ from config.config import WORKING_DIRECTORY
 from memory.memory_store import save_message,get_context
 from subagents.summary_agent import get_summary
 from subagents.todo_maker_agent import create_todo
+from helper.helper import execute_tool
 
 import memory.firebase_config
 # think node is the main working head. It think and plans and decide whether to ask questions to user or act on the ask.
@@ -164,16 +165,63 @@ def act_node_general(state:AgentState):
         logger.error(f"Error caught in final generation phase ->{error_in_final_generation}")
 
 
-
 # Node to handle complex project requests
 
 def todo_for_complex_project(state:AgentState):
     logger.info("Agent making the todo list...")
     received_todo = create_todo(state["goal"],state["plan"])
 
-    for step,task in received_todo:
+    print(type(received_todo))
+
+    for step,task in received_todo.items():
         print(f"\n[{step}] {task}....")
 
+    return{
+        "todos" : received_todo
+    }
+
+# Node to handle complex project execution
+
+def execution_node(state:AgentState):
+    todos = state["todos"]
+    completed = state.get("completed_todos",[])
+
+    for step,task in todos.items():
+        if step in completed:
+            continue
+
+        print(f"[{step}] : {task}")
+
+        llm_with_tool = llm_with_tools.bind_tools(
+            [make_file,
+             create_directory]
+        )
+
+        response = llm_with_tool.invoke([
+            HumanMessage(content=f"""Execute this build step.
+            Working directory: {WORKING_DIRECTORY}
+            
+            Rules:
+            - Create directories with create_directory
+            - Create files with make_file
+            - For dependencies: write package.json
+              or requirements.txt (don't install)
+            - Always include setup instructions
+              in a README.md
+            """),
+            HumanMessage(content=task)
+        ])
+
+        if response.tool_calls:
+            for tool_call in response.tool_calls:
+                result = execute_tool(tool_call)
+                logger.info(f"/ {step}: {result}")
+
+            completed.append(step)
+    return{
+        "completed":completed,
+        "reponse":f"Project done"
+    }
 
 # function to builf langgraph stated graph
 
@@ -187,6 +235,7 @@ def build_graph():
         graph.add_node("write",act_node_write)
         graph.add_node("general",act_node_general) 
         graph.add_node("todo_for_complex_project",todo_for_complex_project)
+        graph.add_node("execution_node",execution_node)
 
 
         graph.add_edge(START,"think")
@@ -207,7 +256,8 @@ def build_graph():
         
         graph.add_edge("write",END)
         graph.add_edge("general",END)
-
+        graph.add_edge("todo_for_complex_project","execution_node")
+        graph.add_edge("execution_node",END)
         logger.info("Graph build completed")
 
         app = graph.compile()

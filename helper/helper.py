@@ -1,6 +1,7 @@
 # utils/response_parser.py
 import json
 from logs.logger import logger
+from LLM.tools.tools import make_file,create_directory
 import re
 
 
@@ -39,3 +40,18 @@ def extract_text_from_response(response) -> str:
     except Exception as e:
         logger.error(f"Response extraction failed → {e}")
         return ""
+    
+
+
+
+def execute_tool(tool_call):
+    name = tool_call["name"]
+    args = tool_call["args"]
+
+    if name == "create_directory":
+        return create_directory.func(**args)
+    
+    if name == "make_file":
+        return make_file.func(**args)
+    else:
+        logger.warning(f"Unknown tool:{name}")

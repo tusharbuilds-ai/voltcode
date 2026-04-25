@@ -17,6 +17,10 @@ class AgentState(TypedDict):
     code:str
     file_path:str
 
+    todos:dict
+    completed_todos:list
+    current_todo:str
+    project_path:str
 
     status:str
     action_taken: str

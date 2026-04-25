@@ -6,9 +6,9 @@ from langchain.messages import HumanMessage
 from graph.graph import build_graph
 from rich.console import Console
 from rich.text import Text
-from config.config import WORKING_DIRECTORY
+import config.config as config
 
-
+ 
 console = Console()
 text = Text(">  What will you build today ?")
 text.stylize("bold red",0,53)
@@ -23,8 +23,10 @@ starup_logo()
 console.print(filepath_text)
 
 file_path = input("Enter the path to working directory:")
+config.WORKING_DIRECTORY = file_path
 
-logger.success(f"Added file path to config WORKING_DIRECTORY - > {WORKING_DIRECTORY}")
+logger.success(f"Added file path to config WORKING_DIRECTORY - > {config.WORKING_DIRECTORY}")
+
 def main():
     deep_agent = build_graph()
     logger.info("Service started")
@@ -45,7 +47,10 @@ def main():
             "code":None,
             "file_path":file_path,
             "status":"Thinking",
-            "action_taken":[]
+            "action_taken":[],
+            "todos":{},
+            "completed_todos":[],
+            "current_todo":None
         })
         
 
